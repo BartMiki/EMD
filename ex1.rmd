@@ -3,8 +3,8 @@ title: "Zadanie 1"
 author: "Bartosz Mikulski"
 date: "30 10 2020"
 output:
+  md_document: default
   html_document: default
-  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
