@@ -1,0 +1,106 @@
+---
+title: "Zadanie 1"
+author: "Bartosz Mikulski"
+date: "30 10 2020"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(knitr.kable.NA = "")
+```
+
+<!-- [Zadanie](http://www.cs.put.poznan.pl/alabijak/emd/04_Powtarzalne_eksperymenty.html#/37) -->
+
+## Wczytywanie danych
+
+Używam `warning=FALSE` oraz `message=FALSE` do ukrycia wiadomości pojawiających się podczas ładowania biblitek.
+
+```{r data_loading, warning=FALSE, message=FALSE, cache=TRUE}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(EDAWR)
+
+df <- tb
+```
+
+## Podsumowanie danych
+
+Tabela posiada 3800 obserwacjii składa się z 6 kolumn. Są to kolejno `country`, `year`, `sex`, `child`, `adult`, `elderly`. Tabela jest tabelą z pakietu `tibble`, a nie podstawową tabelą z R `data.frame`.
+
+Opis kolumn:
+
+* `country` - kraj z którego pochodzi obserwacja,
+* `year` - rok obserwacji,
+* `sex` - jakiej płci dotyczy obserwacja,
+* `child` - liczba zachorowań w przedziale wiekowym od 0 do 14 lat,
+* `adult` - liczba zachorowań w przedziale wiekowym od 15 do 64 lat,
+* `elderly` - liczba zachorowań w przedziale wiekowym powyżej 64 lat.
+
+Dane nie są w czystym formacie danych, ponieważ posiadamy kolumny `child`, `adult`, `elderly`. Aby dane sprowadzić do czystego formatu (zobacz [Tidy Data - Hadley Wickham](https://vita.had.co.nz/papers/tidy-data.pdf)) należało by dodać kolumnę `age_group` zawierającą etykiety `child`, `adult`, `elderly`, a wartości z oryginalnych kolumn zapisać w kolumnie np.: `active_cases`. Wtedy każda obserwacja posiadałaby osobny wiersz.
+
+#### Podsumowanie
+```{r data_summary, echo=FALSE, dependson="data_loading"}
+knitr::kable(summary(df))
+```
+
+Ponieważ kolumny `child`, `adult` oraz `elderly` posiadają wartość NA, należy pamiętać o tym przy operacjach arytmetycznych. W takich wypadkach należy pominąć wartość NA w obliczeniach, aby wynikiem również nie było NA.
+
+#### Przykładowe dane
+
+Zobaczmy jeszcze 5 losowych rekordów, żeby zobaczyć z jakimi danymi będziemy pracować.
+
+```{r data_sample, echo=FALSE}
+set.seed(131803)
+data.sample <- df[sample(nrow(df), 5),]
+knitr::kable(data.sample, align="c")
+```
+
+#### Konwersja do czystego formatu danych
+
+Aby ułatwić przetwarzanie danych w kolejnych zadaniach, dokonam konwersji danych do czystego formatu z użyciem funkcji `tidyr::gather`. Funkcję opisano w książce [R Cookbook, Paul Teetor](http://www.cookbook-r.com/Manipulating_data/Converting_data_between_wide_and_long_format/).
+
+```{r gather}
+clean.df <- gather(df, age_group, active_cases, child:elderly)
+```
+
+Zawartość pierwszych 7 rekordów w tabeli `clean.df`:
+
+```{r, echo=FALSE}
+knitr::kable(head(clean.df, 7), align="c")
+```
+
+## Zachorowania z podziałem na płeć
+```{r sickness_by_gender, warning=FALSE, message=FALSE}
+clean.df %>%
+  group_by(sex) %>%
+  summarise(total=sum(active_cases, na.rm=TRUE)) %>%
+  knitr::kable(align="rl")
+```
+
+## Sumaryczne zachorowania w kolejnych latach z podziałem na grupy wiekowe
+```{r ex1_plot_by_age, warning=FALSE, message=FALSE}
+data <- clean.df %>%
+  group_by(year, age_group) %>%
+  summarise(total=sum(active_cases, na.rm=TRUE)) %>%
+  arrange(year)
+
+ggplot(data, aes(year, total, col=age_group)) +
+  geom_line()
+```
+
+## Sumaryczne zachorowania w kolejnych latach z podziałem na kraje
+```{r ex1_plot_by_country, warning=FALSE, message=FALSE}
+
+data <- clean.df %>%
+  group_by(year, country) %>%
+  summarise(total=sum(active_cases, na.rm=TRUE)) %>%
+  arrange(year)
+
+ggplot(data, aes(year, total, col=country)) +
+    geom_line(show.legend = FALSE)
+```
+
