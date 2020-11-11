@@ -1,0 +1,82 @@
+---
+title: "Zadanie 2"
+author: "Bartosz Mikulski"
+date: "11 11 2020"
+output:
+  html_document: default
+  md_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(knitr.kable.NA = "")
+```
+
+```{r, warning=FALSE, message=FALSE, cache=TRUE}
+library(ggplot2)
+```
+
+## Punkt 1 
+Histogram zmiennej `depth`
+```{r p1}
+ggplot(diamonds, aes(depth)) + geom_histogram()
+```
+
+## Punkt 2 
+Histogram zmiennej `depth` z szerokością kubełka na 0.2
+```{r p2}
+ggplot(diamonds, aes(depth)) + geom_histogram(binwidth = 0.2)
+```
+
+## Punkt 3
+Histogram zmiennej `depth` z szerokością kubełka na 0.2 oraz ograniczeniem do przedziału osi x do [50, 70]
+```{r p3}
+ggplot(diamonds, aes(depth)) + geom_histogram(binwidth = 0.2) + xlim(c(55, 70))
+```
+
+## Punkt 4
+Jak zmienna `cut` wpływa na histogram:
+
+Za pomocą koloru
+```{r p4_1}
+ggplot(diamonds, aes(depth, color=cut)) + geom_histogram(binwidth = 0.2) + xlim(c(55, 70))
+```
+
+Za pomocą paneli
+```{r p4_2}
+ggplot(diamonds, aes(depth)) + geom_histogram(binwidth = 0.2) + xlim(c(55, 70)) + facet_wrap(~cut)
+```
+## Punkt 5 
+Histogram zmiennej `price`
+```{r p5_1}
+ggplot(diamonds, aes(price)) + geom_histogram()
+```
+
+Histogram zmiennej `(price)` z szerokością kubełka na 50
+```{r p5_2}
+ggplot(diamonds, aes(price)) + geom_histogram(binwidth = 50)
+```
+
+Histogram zmiennej `depth` z szerokością kubełka na 50 oraz ograniczeniem do przedziału osi x do [0, 19000]
+```{r p5_3}
+ggplot(diamonds, aes(price)) + geom_histogram(binwidth = 50) + xlim(c(0, 19000))
+```
+
+Jak zmienna `cut` wpływa na histogram:
+
+Za pomocą koloru
+```{r p5_4}
+ggplot(diamonds, aes(price, color=cut)) + geom_histogram(binwidth = 50) + xlim(c(0, 19000))
+```
+
+Za pomocą paneli
+```{r p5_5}
+ggplot(diamonds, aes(price)) + geom_histogram(binwidth = 50) + xlim(c(0, 19000)) + facet_wrap(~cut)
+```
+
+## Punkt 6
+Zwizualizuj relację między zmiennymi `carat` i `price`.
+
+```{r p6}
+ggplot(diamonds, aes(carat, price)) + geom_point()
+```
