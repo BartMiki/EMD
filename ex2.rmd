@@ -50,8 +50,8 @@ ggplot(diamonds, aes(depth)) +
 ## Punkt 4
 
 ```{r p4_1, warning=FALSE, message=FALSE}
-ggplot(diamonds, aes(depth, color=cut, fill=cut, alpha=0.4)) + 
-  geom_histogram(binwidth = 0.2) + 
+ggplot(diamonds, aes(depth, color=cut, fill=cut)) + 
+  geom_histogram(binwidth = 0.2, alpha=0.75) + 
   xlim(c(55, 70)) +
   labs(
     title="Histogram zmiennej depth",
@@ -101,7 +101,7 @@ ggplot(diamonds, aes(price)) +
 
 ```{r p5_4, warning=FALSE, message=FALSE}
 ggplot(diamonds, aes(price, color=cut, fill=cut)) + 
-  geom_histogram(binwidth = 150) + 
+  geom_histogram(binwidth = 150, alpha=0.75) + 
   xlim(c(0, 10000)) +
   labs(
     title="Histogram zmiennej price",
@@ -124,6 +124,6 @@ ggplot(diamonds, aes(price)) +
 
 ```{r p6, warning=FALSE, message=FALSE}
 ggplot(diamonds, aes(carat, price)) + 
-  geom_point(alpha=0.25) +
+  geom_point(alpha=0.1) +
   labs(title="Relacja między zmiennymi carat i price")
 ```
