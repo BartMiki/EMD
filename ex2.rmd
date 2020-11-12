@@ -8,7 +8,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = TRUE)
 options(knitr.kable.NA = "")
 ```
 
@@ -124,7 +124,11 @@ ggplot(diamonds, aes(price)) +
 
 ```{r p6, warning=FALSE, message=FALSE}
 ggplot(diamonds, aes(carat, price, color=price)) +
-  geom_point(alpha=0.1, position = position_jitter()) +
-  geom_smooth(position = position_identity(), method = "glm", formula = y ~ poly(x,2)) +
-  labs(title="Relacja między zmiennymi carat i price")
+  geom_point(alpha=0.5, position = position_jitter()) +
+  geom_smooth(method = "glm", formula = y ~ poly(x,2), color="orange", size=1.5) +
+  ylim(c(0, 20000)) +
+  labs(
+    title="Relacja między zmiennymi carat i price",
+    subtitle="Z modelem GLM o formule y ~ poly(x,2)"
+    )
 ```
