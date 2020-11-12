@@ -123,7 +123,8 @@ ggplot(diamonds, aes(price)) +
 ## Punkt 6
 
 ```{r p6, warning=FALSE, message=FALSE}
-ggplot(diamonds, aes(carat, price)) + 
-  geom_point(alpha=0.1) +
+ggplot(diamonds, aes(carat, price, color=price)) +
+  geom_point(alpha=0.1, position = position_jitter()) +
+  geom_smooth(position = position_identity(), method = "glm", formula = y ~ poly(x,2)) +
   labs(title="Relacja między zmiennymi carat i price")
 ```
