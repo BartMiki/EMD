@@ -1,0 +1,159 @@
+---
+title: "Zadanie 3"
+author: "Bartosz Mikulski"
+date: "24 11 2020"
+output:
+  html_document: default
+  md_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,  warning=FALSE, message=FALSE)
+options(knitr.kable.NA = "")
+```
+
+```{r libraries}
+library(ggplot2)
+library(caret)
+library(modeldata)
+library(tibble)
+library(dplyr)
+library(RWeka)
+
+my.seed <- 131803
+
+data(mlc_churn)
+churnData <- as.tibble(data.frame(mlc_churn))
+```
+
+# Klasyfikacja
+
+## Jak wyglądają dane?
+
+```{r look_into_data}
+knitr::kable(head(churnData))
+```
+
+## Podział zbioru danych
+```{r train_test_split}
+set.seed(my.seed)
+inTraining <- createDataPartition(y = churnData$churn, p = .75,list = FALSE)
+
+training <- churnData[ inTraining,]
+testing  <- churnData[-inTraining,]
+```
+
+## Trenowanie klasyfikatorów
+```{r training}
+ctrl <- trainControl(method = "repeatedcv", number = 2, repeats = 5)
+
+set.seed(my.seed)
+model.j48 <- train(churn ~ ., data = training, method = "J48", trControl = ctrl)
+model.lmt <- train(churn ~ ., data = training, method = "LMT", trControl = ctrl)
+```
+
+## Wyniki na zbiorze testowym
+
+#### Wyniki dla algorytmu `Logistic Model Trees`
+```{r jrip_results}
+confusionMatrix(data = predict(model.lmt, newdata = testing), testing$churn)
+```
+
+#### Wyniki dla algorytmu `J48`
+```{r rf_results}
+confusionMatrix(data = predict(model.j48, newdata = testing), testing$churn)
+```
+
+
+## Czy warto wstępnie przetworzyć zbiór?
+
+Moim zdaniem zawsze warto przetworzyć zbiór danych, wiele algorytmów na tym może skorzystać np.: sieci neuronowe czy SVM wręcz wymagają ustandaryzowanych danych. Wiele algorytmów nie przyjmuje też na wejście tekstu/kategori i trzeba je specjalnie kodować.
+
+Sprawdźmy jeszcze jak zachowa się algorytm `J48` kiedy wstępnie przetworzymy dane:
+```{r}
+model.pre.j48 <- train(churn ~ ., data = training, method = "J48", trControl = ctrl, preProc = c("center", "scale"))
+confusionMatrix(data = predict(model.pre.j48, newdata = testing), testing$churn)
+```
+Jak widać wyniki poprawiły się, dla przykłdu `Sensitivity` wzrosło z 0.69886 do 0.7159, a `Specificity` nieznacznie z 0.99161 do 0.9925.
+
+## Określ przestrzeń przeszukiwania parametrów
+
+Ustawiłem przestrzeń poszukiwania hiperparametrów dla `J48` taką, że parametr `C` (pruning confidence) na wektor c(0.1, 0.25, 0.3), a parametr `M` (minimum number of instances in leaf) na wektor c(1, 2, 5, 10). Oba wektory zawierają wartości domyślne.
+
+Dla alorytmu `LMT` ustawiłem jedyny parametr `iter` na wartości c(10, 20, 30).
+
+```{r search_space}
+j48.grid <- expand.grid(C=c(0.1, 0.25, 0.3) , M=c(1, 2, 5, 10))
+lmt.grid <- expand.grid(iter=c(10, 20, 30))
+ctrl <- trainControl(method = "repeatedcv", number = 2, repeats = 5, classProbs = TRUE, summaryFunction = twoClassSummary)
+
+set.seed(my.seed)
+j48.tune.fit <- train(churn ~ ., data = training, 
+                      method = "J48", metric = "ROC", 
+                      preProc = c("center", "scale"),
+                      trControl=ctrl,
+                      tuneGrid = j48.grid)
+
+set.seed(my.seed)
+lmt.tune.fit <- train(churn ~ ., data = training, 
+                      method = "LMT", metric = "ROC", 
+                      preProc = c("center", "scale"),
+                      trControl=ctrl,
+                      tuneGrid = lmt.grid)
+```
+
+## Prównanie algorytmów za pomocą wykresu
+```{r comparasion}
+resamps <- resamples(list(J48 = j48.tune.fit, LMT = lmt.tune.fit))
+difValues <- diff(resamps)
+difValues
+
+theme1 <- trellis.par.get()
+theme1$plot.symbol$col = rgb(.2, .2, .2, .4)
+theme1$plot.symbol$pch = 16
+theme1$plot.line$col = rgb(1, 0, 0, .7)
+theme1$plot.line$lwd <- 2
+
+trellis.par.set(theme1)
+bwplot(difValues, layout = c(3, 1))
+```
+Porównanie wartości pokazuje niewielką przewagę `LMT` nad `J48`, jednakże jest to tak marginalna różnica, że można powiedzieć, że algorytmy mają identyczną jakość.
+
+# Regresja
+
+## Podział danych
+```{r reg_split}
+data(diamonds)
+inTraining <- createDataPartition(y=diamonds$price, p=.7, list=FALSE)
+
+training <- diamonds[inTraining,]
+testing <- diamonds[-inTraining,]
+```
+
+## Trenowanie modelu
+```{r reg_model}
+ctrl <- trainControl(method = "repeatedcv", number = 2, repeats = 5)
+set.seed(my.seed)
+
+model.lm <- train(price ~ ., data = training, method = "lm", trControl = ctrl, preProc = c("center", "scale"))
+```
+
+## Predykcja na zbiorze testowym
+```{r reg_test}
+y_hat = predict(model.lm, newdata=select(testing, -c(price)))
+y = testing$price
+
+RMSE(y_hat, y)
+```
+
+## Wpływ zmiennych na cenę diamentu
+```{r price_dependent}
+
+cols <- c("carat","depth","table","x","y","z")
+
+small_df <- sample_n(diamonds, 1000)
+featurePlot(x = small_df[,cols],
+            y = small_df$price, 
+            plot = "scatter",
+            layout = c(length(cols), 1))
+```
