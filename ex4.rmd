@@ -1,0 +1,105 @@
+---
+title: "Zadanie 4"
+author: "Bartosz Mikulski"
+date: "27 11 2020"
+output:
+  html_document: default
+  md_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,  warning=FALSE, message=FALSE)
+options(knitr.kable.NA = "")
+```
+
+```{r libraries}
+library(ggplot2)
+library(factoextra)
+library(fpc)
+library(NbClust)
+library(aricode) # For AMI
+library(dplyr)
+library(tibble)
+library(pheatmap)
+
+set.seed(23)
+face <- rFace(1000, p=2, dMoNo=3)
+df = data.frame(x=face[,1], y=face[,2])
+labels = as.integer(attr(face,"grouping"))
+```
+
+## Faktyczne dane
+```{r goldstandard}
+plot_face <-function(predicted, name){
+  p <- ggplot(df, aes(x, y, color=factor(predicted))) + geom_point() + theme_bw() + labs(title=name)
+  return(p)
+}
+
+plot_face(labels, "Dane oryginalne")
+```
+
+## K-średnie
+```{r kmeans}
+km.res <- eclust(df, "kmeans", k = length(unique(labels)), nstart = 25, graph = F)
+fviz_cluster(km.res, palette = "jco", ggtheme = theme_minimal())
+```
+
+## K-medioidy
+```{r kmedioids}
+pam.res <- eclust(df, "pam", k = length(unique(labels)), graph = F)
+fviz_cluster(pam.res, palette = "jco", ggtheme = theme_minimal())
+```
+
+## AHC
+```{r ahc}
+ahc.res <- eclust(df, "hclust", k = length(unique(labels)), hc_metric = "euclidean", hc_method = "ward.D2", graph = F)
+fviz_dend(ahc.res, show_labels = F, palette = "jco", as.ggplot = T)
+fviz_cluster(ahc.res, palette = "jco", ggtheme = theme_minimal())
+```
+
+## DBSCAN
+```{r dbscan}
+db.res <- fpc::dbscan(df, eps=0.25, MinPts=4, scale=TRUE)
+fviz_cluster(db.res, df, stand=F, ellipse=F, show.clust.cent=F, geom="point", palette="jco", ggtheme= theme_classic())
+```
+
+## Porównanie jakości grupowania
+
+### Miara liczbowa
+
+Tabela zawiera algorytmy posortowane malejąco według wyniku AMI.
+```{r single_metrix}
+data.frame(algorytm=c("K-średnie", "K-medioidy", "AHC", "DBSCAN"),
+           AMI=c(
+             AMI(km.res$cluster, labels),
+             AMI(pam.res$cluster, labels),
+             AMI(ahc.res$cluster, labels),
+             AMI(db.res$cluster, labels)
+           )
+) %>% as.tibble() %>% arrange(desc(AMI))
+```
+
+### Macierz pomyłek
+
+```{r confiusion_matrix}
+
+hmap = function(predicted, name){
+  pheatmap(table(labels, predicted), color = colorRampPalette(c('grey','white'))(10), display_numbers = TRUE,
+           cluster_rows = F, cluster_cols = F, main=paste("Macierz pomyłek dla", name), fontsize = 11, legend=TRUE)
+}
+
+hmap(km.res$cluster, "K-średnich")
+hmap(pam.res$cluster, "K-medioidów")
+hmap(ahc.res$cluster, "AHC")
+hmap(db.res$cluster, "DBSCAN")
+```
+
+
+### Wizulaizajca danych
+```{r plots}
+plot_face(km.res$cluster, "Algorytm K-średnich")
+plot_face(pam.res$cluster, "Algorytm K-medioidów")
+plot_face(ahc.res$cluster, "AHC")
+plot_face(db.res$cluster, "DBSCAN")
+```
+
