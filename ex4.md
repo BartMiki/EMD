@@ -74,15 +74,34 @@ Tabela zawiera algorytmy posortowane malejąco według wyniku AMI.
                  AMI(ahc.res$cluster, labels),
                  AMI(db.res$cluster, labels)
                )
-    ) %>% as.tibble() %>% arrange(desc(AMI))
+    ) %>% as.tibble() %>% arrange(desc(AMI)) %>% knitr::kable()
 
-    ## # A tibble: 4 x 2
-    ##   algorytm     AMI
-    ##   <fct>      <dbl>
-    ## 1 DBSCAN     0.974
-    ## 2 K-średnie  0.793
-    ## 3 AHC        0.787
-    ## 4 K-medioidy 0.744
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">algorytm</th>
+<th style="text-align: right;">AMI</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">DBSCAN</td>
+<td style="text-align: right;">0.9737360</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">K-średnie</td>
+<td style="text-align: right;">0.7933811</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">AHC</td>
+<td style="text-align: right;">0.7865455</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">K-medioidy</td>
+<td style="text-align: right;">0.7440690</td>
+</tr>
+</tbody>
+</table>
 
 ### Macierz pomyłek
 

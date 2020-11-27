@@ -76,7 +76,7 @@ data.frame(algorytm=c("K-średnie", "K-medioidy", "AHC", "DBSCAN"),
              AMI(ahc.res$cluster, labels),
              AMI(db.res$cluster, labels)
            )
-) %>% as.tibble() %>% arrange(desc(AMI))
+) %>% as.tibble() %>% arrange(desc(AMI)) %>% knitr::kable()
 ```
 
 ### Macierz pomyłek

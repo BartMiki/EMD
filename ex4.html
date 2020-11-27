@@ -430,14 +430,33 @@ fviz_cluster(db.res, df, stand=F, ellipse=F, show.clust.cent=F, geom=&quot;point
              AMI(ahc.res$cluster, labels),
              AMI(db.res$cluster, labels)
            )
-) %&gt;% as.tibble() %&gt;% arrange(desc(AMI))</code></pre>
-<pre><code>## # A tibble: 4 x 2
-##   algorytm     AMI
-##   &lt;fct&gt;      &lt;dbl&gt;
-## 1 DBSCAN     0.974
-## 2 K-średnie  0.793
-## 3 AHC        0.787
-## 4 K-medioidy 0.744</code></pre>
+) %&gt;% as.tibble() %&gt;% arrange(desc(AMI)) %&gt;% knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">algorytm</th>
+<th align="right">AMI</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">DBSCAN</td>
+<td align="right">0.9737360</td>
+</tr>
+<tr class="even">
+<td align="left">K-średnie</td>
+<td align="right">0.7933811</td>
+</tr>
+<tr class="odd">
+<td align="left">AHC</td>
+<td align="right">0.7865455</td>
+</tr>
+<tr class="even">
+<td align="left">K-medioidy</td>
+<td align="right">0.7440690</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div id="macierz-pomyłek" class="section level3">
 <h3>Macierz pomyłek</h3>
