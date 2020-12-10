@@ -8,11 +8,20 @@ shinyUI(fluidPage(
   titlePanel("Filmy - zabójstwa"),
   
   sidebarLayout(
-    sidebarPanel("Wybierz filmy do porównania", 
-                 actionButton("clean", "Clean data"),
-                 dataTableOutput("movie_select")),
+    sidebarPanel(
+      h3("Wybierz filmy do porównania"),
+      dataTableOutput("movie_select"),
+      actionButton("clean", "Wyczyść wyszukiwanie"),
+      h3("Linki do wybranych filmów"),
+      tags$ul(uiOutput("movie_urls"))
+      ),
     
-    mainPanel("Porównanie zabitych w wybranych filmach", 
-              plotOutput("body_count_cmp", click = "plot_click"))
+    mainPanel(
+      h1("Porównanie zabitych w wybranych filmach"), 
+      plotOutput("body_count_cmp"),
+      plotOutput("body_ratio_cmp"),
+      plotOutput("body_to_permin_cmp"),
+      plotOutput("body_rating_cmp")
+      )
   ))
 )
