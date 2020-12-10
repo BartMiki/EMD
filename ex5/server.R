@@ -29,10 +29,10 @@ dataInput <- as.tibble(read.csv("filmdeathcounts.csv")) %>%
   mutate(Url = pmap_chr(list(Film, Year), get_url))
 
 shinyServer(function(input, output) {
-  output$movie_select <- renderDataTable({dataInput[c("Film")]}, filter="top", rownames=FALSE)
+  output$movie_select <- renderDataTable({dataInput[c("Film", "Body_Count", "Year")]}, filter="top", rownames=FALSE)
   
   observeEvent(input$clean, {
-    output$movie_select <- renderDataTable({dataInput[c("Film")]}, filter="top", rownames=FALSE)
+    output$movie_select <- renderDataTable({dataInput[c("Film", "Body_Count", "Year")]}, filter="top", rownames=FALSE)
   })
   
   output$movie_urls <- renderUI({
@@ -50,7 +50,7 @@ shinyServer(function(input, output) {
       geom_bar(stat="identity") + 
       # scale_fill_manual(palette="Reds") +
       xlab("Zabici") + ylab("Film") + 
-      labs(title="PoróWnanie zabitych w wybranych filmach")
+      labs(title="Porównanie zabitych w wybranych filmach")
   })
   
   output$body_ratio_cmp <- renderPlot({
@@ -61,7 +61,7 @@ shinyServer(function(input, output) {
       geom_bar(stat="identity") + 
       # scale_fill_manual(palette="Reds") +
       xlab("Zabici na minutę") + ylab("Film") + 
-      labs(title="PoróWnanie zabitych na minute w wybranych filmach")
+      labs(title="Porównanie zabitych na minute w wybranych filmach")
   })
   
   output$body_to_permin_cmp <- renderPlot({
